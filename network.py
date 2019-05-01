@@ -1,11 +1,12 @@
 import socket
 import pickle
+import os
 
-class Network:
-    def __init__(self):
+class Client_Network:
+    def __init__(self, serverIP, serverPort):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.serverIP = '192.168.1.3'
-        self.serverPort = 5555
+        self.serverIP = '127.0.0.1'
+        self.serverPort = 7000
         self.addr = (self.serverIP, self.serverPort)
         self.replay = self.connect()
 
@@ -29,21 +30,35 @@ class Network:
             return pickle.loads(self.client.recv(1024))
         except socket.error as e:
             print(e)
-    def download(self):
-        data = pickle.dumps("download")
-        self.client.send(data)
 
-        downFile = open("LatestVersionnDownload.txt", "wb")
-        recv =True
+    def download_latest_app_definition(self):
+        data = pickle.dumps("download_app_definition")
+        self.client.send(data)
+        if (not os.path.exists("ClientFiles/Executables")):
+            os.makedirs("ClientFiles/Executables")
+        downFile = open("ClientFiles/LatestVersion_on_server.csv", "wb")
+        recv=True
         data = self.client.recv(1024)
         while data != b'':
             downFile.write(data)
             data = self.client.recv(1024)
 
-        print("data berhasil di didonload")
+        print("Latest Apps Definition Downloaded")
         downFile.close()
 
-n=Network()
-n.download()
+    def request_package(self, package_name):
+        data = pickle.dumps("Request_"+package_name)
+        self.client.send(data)
+        if (not os.path.exists("ClientFiles/Executables")):
+            os.makedirs("ClientFiles/Executables")
+        downFile = open("ClientFiles/Executables/"+package_name, "wb")
+        recv=True
+        print("Downloading", package_name)
+        data = self.client.recv(1024)
+        while data != b'':
+            downFile.write(data)
+            data = self.client.recv(1024)
+        print("Package Downloaded")
+        downFile.close()
 
 
