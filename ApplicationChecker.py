@@ -46,7 +46,8 @@ class RegistryChecker:
         registry_dict = {}
         key = winreg.OpenKey(self.hkey, self.keypath, 0, winreg.KEY_READ)
         for value in self.__get_val(key):
-            registry_dict[value[1]['DisplayName']] = value[1]['DisplayVersion']
+            if 'DisplayVersion' in value[1] and 'DisplayName' in value[1]:
+                registry_dict[value[1]['DisplayName']] = value[1]['DisplayVersion']
         return registry_dict
 
 class VersionComparator:
